@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1f14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Slow Burn">
+<title>Slow Burn</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #0d1f14;
+    --bg2: #152a1e;
+    --green-dark: #1a3020;
+    --green-mid: #2d5a2d;
+    --green-hi: #3d8a3d;
+    --green-text: #a8d5a8;
+    --green-dim: #5a8a5a;
+    --green-faint: #3a6a3a;
+    --text: #d4e8d4;
+    --font: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); }
+  body { min-height: 100vh; background: linear-gradient(160deg, #0d1f14 0%, #152a1e 100%); }
+
+  .screen { display: none; flex-direction: column; align-items: center; min-height: 100vh; padding: 0 0 48px; }
+  .screen.active { display: flex; }
+
+  /* ── HEADER ── */
+  .header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 20px 24px 0; }
+  .logo { font-size: 20px; color: var(--green-text); letter-spacing: 1px; }
+  .adj-btn { background: none; border: 1px solid var(--green-mid); color: var(--green-dim); border-radius: 20px; padding: 6px 14px; font-size: 12px; cursor: pointer; font-family: var(--font); letter-spacing: 1px; }
+
+  /* ── BASELINE SCREEN ── */
+  #baseline { padding: 32px 24px 48px; }
+  .baseline-title { font-size: 28px; font-weight: normal; color: var(--green-text); text-align: center; margin-bottom: 6px; }
+  .baseline-sub { font-size: 13px; color: var(--green-dim); text-align: center; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 32px; }
+  .baseline-explain { font-size: 15px; color: #7ab57a; text-align: center; line-height: 1.7; max-width: 320px; margin: 0 auto 32px; }
+
+  .big-count { font-size: 96px; color: var(--green-text); text-align: center; line-height: 1; margin: 8px 0; }
+  .count-label { font-size: 13px; color: var(--green-faint); text-align: center; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px; }
+
+  .smoke-now-btn { background: linear-gradient(135deg, #2d6a2d, #3d8a3d); color: #d4f4d4; border: none; border-radius: 50px; padding: 20px 60px; font-size: 18px; cursor: pointer; font-family: var(--font); letter-spacing: 2px; box-shadow: 0 4px 24px rgba(50,150,50,0.35); transition: transform 0.1s; width: 100%; max-width: 300px; }
+  .smoke-now-btn:active { transform: scale(0.96); }
+
+  .day-grid { margin-top: 32px; width: 100%; max-width: 340px; }
+  .day-grid-title { font-size: 11px; color: var(--green-faint); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+  .day-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--green-dark); border-radius: 10px; margin-bottom: 6px; border: 1px solid #1e3a24; }
+  .day-row-label { font-size: 13px; color: var(--green-dim); }
+  .day-row-count { font-size: 20px; color: var(--green-text); }
+
+  .baseline-progress { width: 100%; max-width: 340px; margin-top: 28px; }
+  .progress-bar-bg { background: var(--green-dark); border-radius: 10px; height: 8px; margin-top: 8px; overflow: hidden; }
+  .progress-bar-fill { background: linear-gradient(90deg, #2d6a2d, #5cb85c); height: 100%; border-radius: 10px; transition: width 0.5s; }
+  .progress-label { font-size: 12px; color: var(--green-faint); letter-spacing: 1px; }
+
+  .review-section { width: 100%; max-width: 340px; margin-top: 28px; }
+  .review-title { font-size: 16px; color: var(--green-text); margin-bottom: 12px; }
+  .stat-row { display: flex; justify-content: space-between; padding: 10px 14px; background: var(--green-dark); border-radius: 10px; margin-bottom: 8px; border: 1px solid #1e3a24; }
+  .stat-label { font-size: 13px; color: var(--green-dim); }
+  .stat-val { font-size: 16px; color: var(--green-text); }
+  .option-btn { width: 100%; padding: 14px; border-radius: 50px; border: 1px solid var(--green-mid); background: none; color: var(--green-text); font-size: 15px; cursor: pointer; font-family: var(--font); margin-bottom: 10px; transition: background 0.2s; }
+  .option-btn:active { background: var(--green-dark); }
+  .option-btn.primary { background: linear-gradient(135deg, #2d6a2d, #3d8a3d); border: none; box-shadow: 0 4px 20px rgba(50,150,50,0.3); }
+
+  /* ── MAIN SCREEN ── */
+  .ring-wrap { margin-top: 36px; position: relative; width: 220px; height: 220px; }
+  .ring-wrap svg { position: absolute; top: 0; left: 0; }
+  .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .ring-label { font-size: 11px; color: var(--green-faint); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+  .ring-time { font-size: 36px; color: var(--green-text); letter-spacing: -1px; line-height: 1; }
+  .ring-allowed { font-size: 44px; color: #8fdb8f; line-height: 1; }
+
+  .today-wrap { margin-top: 20px; text-align: center; }
+  .today-label { font-size: 12px; color: var(--green-faint); letter-spacing: 2px; text-transform: uppercase; }
+  .today-count { font-size: 52px; color: #c8e8c8; line-height: 1.1; }
+  .today-sub { font-size: 13px; color: #4a7a4a; }
+
+  .interval-note { margin-top: 10px; font-size: 13px; color: #4a7a4a; text-align: center; }
+
+  .action-wrap { margin-top: 32px; display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; padding: 0 24px; }
+  .log-btn { background: linear-gradient(135deg, #2d6a2d, #3d8a3d); color: #d4f4d4; border: none; border-radius: 50px; padding: 18px; font-size: 16px; cursor: pointer; font-family: var(--font); letter-spacing: 2px; box-shadow: 0 4px 24px rgba(50,150,50,0.35); transition: all 0.2s; }
+  .log-btn:disabled { background: #1a2f1a; color: #3a5a3a; box-shadow: none; cursor: not-allowed; }
+  .log-btn:not(:disabled):active { transform: scale(0.96); }
+  .skip-btn { background: none; border: 1px solid #2a4a2a; color: var(--green-dim); border-radius: 50px; padding: 14px; font-size: 14px; cursor: pointer; font-family: var(--font); letter-spacing: 2px; }
+
+  .history-wrap { margin-top: 32px; width: 100%; max-width: 340px; padding: 0 24px; }
+  .history-title { font-size: 11px; color: var(--green-faint); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+  .history-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { background: var(--green-dark); border: 1px solid #2a4a2a; border-radius: 8px; padding: 4px 10px; font-size: 11px; color: var(--green-dim); }
+
+  /* ── CHIME BANNER ── */
+  #chime-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: linear-gradient(90deg, #2d6a2d, #3d8a3d); color: #d4f0d4; text-align: center; padding: 16px; font-size: 16px; letter-spacing: 2px; font-family: var(--font); display: none; animation: slideDown 0.3s ease; }
+  @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* ── SETUP / GOAL SCREEN ── */
+  #goal-screen { padding: 32px 24px 48px; }
+  .setup-title { font-size: 24px; font-weight: normal; color: var(--green-text); text-align: center; margin-bottom: 28px; }
+  .field-wrap { width: 100%; max-width: 340px; margin-bottom: 24px; }
+  .field-label { font-size: 12px; color: #7ab57a; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 8px; }
+  .stepper { display: flex; align-items: center; gap: 12px; }
+  .step-btn { background: var(--green-dark); border: 1px solid var(--green-mid); color: #8fbc8f; border-radius: 10px; width: 44px; height: 44px; font-size: 22px; cursor: pointer; }
+  .step-val { flex: 1; text-align: center; font-size: 32px; color: #c8e8c8; }
+  .save-btn { background: linear-gradient(135deg, #2d6a2d, #3d8a3d); color: #d4f4d4; border: none; border-radius: 50px; padding: 16px 48px; font-size: 16px; cursor: pointer; font-family: var(--font); letter-spacing: 1.5px; box-shadow: 0 4px 20px rgba(60,120,60,0.4); }
+  .notif-btn { background: none; border: 1px solid var(--green-mid); color: var(--green-dim); border-radius: 20px; padding: 10px 20px; font-size: 13px; cursor: pointer; font-family: var(--font); letter-spacing: 1px; margin-bottom: 20px; }
+  .notif-btn.on { border-color: #5cb85c; color: #5cb85c; }
+</style>
+</head>
+<body>
+
+<!-- Chime banner -->
+<div id="chime-banner">✨ You may have one now</div>
+
+<!-- SCREEN: Baseline tracking -->
+<div class="screen active" id="baseline">
+  <div style="width:100%;max-width:400px;display:flex;flex-direction:column;align-items:center;">
+    <div style="padding-top:40px;text-align:center;">
+      <div style="font-size:38px;margin-bottom:6px;">🍃</div>
+      <div class="baseline-title">Slow Burn</div>
+      <div class="baseline-sub">gentle reduction pacer</div>
+      <div class="baseline-explain" id="baseline-explain">
+        Just tap below every time you have a cigarette this week. After 7 days the app will figure out your baseline and build a gentle plan to get you down to 10 a day.
+      </div>
+    </div>
+
+    <div class="big-count" id="baseline-today-count">0</div>
+    <div class="count-label">today</div>
+
+    <button class="smoke-now-btn" id="baseline-log-btn" onclick="baselineLog()">I HAD ONE</button>
+
+    <div class="baseline-progress" style="margin-top:24px;">
+      <div class="progress-label">Baseline tracking: <span id="days-done">0</span> / 7 days</div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="day-grid" id="day-grid">
+      <div class="day-grid-title">Daily log</div>
+      <div id="day-rows"></div>
+    </div>
+
+    <!-- After 7 days: review section -->
+    <div id="review-section" style="display:none;" class="review-section">
+      <div class="review-title">📊 Your baseline week</div>
+      <div class="stat-row"><span class="stat-label">Average per day</span><span class="stat-val" id="stat-avg">—</span></div>
+      <div class="stat-row"><span class="stat-label">Highest day</span><span class="stat-val" id="stat-max">—</span></div>
+      <div class="stat-row"><span class="stat-label">Lowest day</span><span class="stat-val" id="stat-min">—</span></div>
+      <div style="margin:16px 0 10px;font-size:14px;color:var(--green-dim);line-height:1.6;" id="review-advice"></div>
+      <button class="option-btn primary" onclick="startPlan('avg')">Start from average (<span id="start-avg-val">—</span>/day)</button>
+      <button class="option-btn" onclick="startPlan('max')">Start from highest (<span id="start-max-val">—</span>/day)</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: Main pacer -->
+<div class="screen" id="main">
+  <div class="header">
+    <div class="logo">🍃 Slow Burn</div>
+    <button class="adj-btn" onclick="showGoalScreen()">ADJUST</button>
+  </div>
+
+  <div class="ring-wrap">
+    <svg width="220" height="220" style="transform:rotate(-90deg)">
+      <circle cx="110" cy="110" r="90" fill="none" stroke="#1a3020" stroke-width="12"/>
+      <circle id="ring-arc" cx="110" cy="110" r="90" fill="none" stroke="#3d7a3d" stroke-width="12"
+        stroke-dasharray="0 565" stroke-linecap="round"/>
+    </svg>
+    <div class="ring-center">
+      <div class="ring-label" id="ring-label">NEXT IN</div>
+      <div class="ring-time" id="ring-time">—</div>
+    </div>
+  </div>
+
+  <div class="today-wrap">
+    <div class="today-label">Today</div>
+    <div class="today-count" id="main-today-count">0</div>
+    <div class="today-sub" id="main-today-sub">Goal: 10/day</div>
+  </div>
+  <div class="interval-note" id="interval-note"></div>
+
+  <div class="action-wrap">
+    <button class="log-btn" id="main-log-btn" onclick="mainLog()">I HAD ONE</button>
+    <button class="skip-btn" id="skip-btn" style="display:none" onclick="skipSmoke()">SKIP — RESET TIMER</button>
+  </div>
+
+  <div class="history-wrap">
+    <div class="history-title">Today's log</div>
+    <div class="history-chips" id="history-chips"></div>
+  </div>
+</div>
+
+<!-- SCREEN: Goal / adjust -->
+<div class="screen" id="goal-screen">
+  <div style="width:100%;max-width:400px;display:flex;flex-direction:column;align-items:center;padding:32px 24px 48px;">
+    <div class="setup-title">Adjust Your Plan</div>
+
+    <div class="field-wrap">
+      <label class="field-label">Daily goal (cigarettes)</label>
+      <div class="stepper">
+        <button class="step-btn" onclick="step('goal',-1)">−</button>
+        <div class="step-val" id="goal-val">10</div>
+        <button class="step-btn" onclick="step('goal',1)">+</button>
+      </div>
+    </div>
+
+    <div class="field-wrap">
+      <label class="field-label">Weeks to reach goal</label>
+      <div class="stepper">
+        <button class="step-btn" onclick="step('weeks',-1)">−</button>
+        <div class="step-val" id="weeks-val">8</div>
+        <button class="step-btn" onclick="step('weeks',1)">+</button>
+      </div>
+    </div>
+
+    <button class="notif-btn" id="notif-btn" onclick="requestNotif()">🔔 Enable notifications</button>
+
+    <button class="save-btn" onclick="saveGoal()">SAVE</button>
+    <br>
+    <button class="adj-btn" style="margin-top:16px;" onclick="showScreen('main')">← Back</button>
+  </div>
+</div>
+
+<script>
+// ─────────── STATE ───────────
+const KEY = 'slowburn_v2';
+let S = {
+  phase: 'baseline',      // 'baseline' | 'active'
+  baseline: {},           // { 'YYYY-MM-DD': count }
+  baselineLogs: [],       // [{ts}]
+  startDate: null,        // when active phase began
+  startPerDay: null,
+  goalPerDay: 10,
+  weeksToGoal: 8,
+  activeLogs: [],         // [{ts, date}]
+  nextAllowed: null,
+  notifGranted: false,
+};
+
+function save() { localStorage.setItem(KEY, JSON.stringify(S)); }
+function load() {
+  try { const r = localStorage.getItem(KEY); if (r) S = JSON.parse(r); } catch {}
+}
+function todayKey() { return new Date().toISOString().slice(0,10); }
+function minsBetween(perDay) { return Math.round((16*60) / perDay); }
+
+// ─────────── INIT ───────────
+load();
+if (S.phase === 'active') {
+  showScreen('main');
+  renderMain();
+} else {
+  showScreen('baseline');
+  renderBaseline();
+}
+
+// ─────────── SCREENS ───────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showGoalScreen() {
+  document.getElementById('goal-val').textContent = S.goalPerDay;
+  document.getElementById('weeks-val').textContent = S.weeksToGoal;
+  updateNotifBtn();
+  showScreen('goal-screen');
+}
+
+// ─────────── BASELINE PHASE ───────────
+function baselineLog() {
+  const ts = Date.now();
+  const day = todayKey();
+  S.baselineLogs.push({ ts, date: day });
+  S.baseline[day] = (S.baseline[day] || 0) + 1;
+  save();
+  playChime(true);
+  if (navigator.vibrate) navigator.vibrate([30,20,30]);
+  renderBaseline();
+}
+
+function renderBaseline() {
+  const today = todayKey();
+  document.getElementById('baseline-today-count').textContent = S.baseline[today] || 0;
+  const days = Object.keys(S.baseline).sort();
+  const daysDone = days.length;
+  document.getElementById('days-done').textContent = daysDone;
+  document.getElementById('progress-fill').style.width = Math.min(daysDone/7*100, 100) + '%';
+
+  // Day rows
+  const rows = document.getElementById('day-rows');
+  rows.innerHTML = '';
+  days.slice().reverse().forEach(d => {
+    const label = formatDayLabel(d);
+    rows.innerHTML += `<div class="day-row"><span class="day-row-label">${label}</span><span class="day-row-count">${S.baseline[d]}</span></div>`;
+  });
+
+  // After 7 days show review
+  if (daysDone >= 7) {
+    document.getElementById('baseline-explain').style.display = 'none';
+    document.getElementById('baseline-log-btn').textContent = 'LOG ONE MORE';
+    showReview(days);
+  }
+}
+
+function showReview(days) {
+  const counts = days.map(d => S.baseline[d]);
+  const avg = Math.round(counts.reduce((a,b)=>a+b,0)/counts.length);
+  const max = Math.max(...counts);
+  const min = Math.min(...counts);
+  document.getElementById('stat-avg').textContent = avg;
+  document.getElementById('stat-max').textContent = max;
+  document.getElementById('stat-min').textContent = min;
+  document.getElementById('start-avg-val').textContent = avg;
+  document.getElementById('start-max-val').textContent = max;
+
+  let advice = '';
+  const spread = max - min;
+  if (spread <= 3) {
+    advice = `Your usage is pretty consistent (${min}–${max}/day). Starting from your average is a solid choice.`;
+  } else {
+    advice = `Your days vary a bit (${min}–${max}/day). Starting from the average gives a gentler pace; starting from the highest gives you the most room. Your call.`;
+  }
+  document.getElementById('review-advice').textContent = advice;
+  document.getElementById('review-section').style.display = 'block';
+}
+
+function startPlan(mode) {
+  const counts = Object.values(S.baseline);
+  const avg = Math.round(counts.reduce((a,b)=>a+b,0)/counts.length);
+  const max = Math.max(...counts);
+  S.startPerDay = mode === 'max' ? max : avg;
+  S.startDate = todayKey();
+  S.phase = 'active';
+  const interval = minsBetween(S.startPerDay);
+  S.nextAllowed = Date.now() + interval * 60000;
+  S.activeLogs = [];
+  save();
+  showScreen('main');
+  renderMain();
+  scheduleNotif(S.nextAllowed);
+}
+
+// ─────────── ACTIVE PHASE ───────────
+let chimeFired = false;
+let tickTimer = null;
+
+function currentInterval() {
+  const { startPerDay, goalPerDay, weeksToGoal, startDate } = S;
+  const totalDays = weeksToGoal * 7;
+  const start = new Date(startDate);
+  const daysPassed = Math.floor((Date.now() - start.getTime()) / 86400000);
+  const progress = Math.min(daysPassed / totalDays, 1);
+  const current = Math.round(startPerDay - (startPerDay - goalPerDay) * progress);
+  return minsBetween(Math.max(current, goalPerDay));
+}
+
+function renderMain() {
+  clearInterval(tickTimer);
+  tickTimer = setInterval(tick, 1000);
+  tick();
+}
+
+function tick() {
+  const now = Date.now();
+  const allowed = !S.nextAllowed || now >= S.nextAllowed;
+  const msLeft = S.nextAllowed ? Math.max(0, S.nextAllowed - now) : 0;
+  const interval = currentInterval();
+  const circ = 2 * Math.PI * 90;
+  const pct = allowed ? 1 : 1 - msLeft / (interval * 60000);
+  const dash = circ * pct;
+
+  document.getElementById('ring-arc').setAttribute('stroke-dasharray', `${dash} ${circ}`);
+  document.getElementById('ring-arc').setAttribute('stroke', allowed ? '#5cb85c' : '#3d7a3d');
+
+  if (allowed) {
+    document.getElementById('ring-label').textContent = 'ALLOWED';
+    document.getElementById('ring-time').textContent = '✓';
+    document.getElementById('ring-time').style.fontSize = '44px';
+    if (!chimeFired) { chimeFired = true; fireChime(); }
+    document.getElementById('skip-btn').style.display = 'block';
+  } else {
+    document.getElementById('ring-label').textContent = 'NEXT IN';
+    document.getElementById('ring-time').textContent = fmtMs(msLeft);
+    document.getElementById('ring-time').style.fontSize = '36px';
+    chimeFired = false;
+    document.getElementById('skip-btn').style.display = 'none';
+  }
+
+  document.getElementById('main-log-btn').disabled = !allowed;
+  document.getElementById('main-log-btn').textContent = allowed ? 'I HAD ONE' : 'NOT YET';
+
+  const today = todayKey();
+  const todayLogs = S.activeLogs.filter(l => l.date === today);
+  document.getElementById('main-today-count').textContent = todayLogs.length;
+  document.getElementById('main-today-sub').textContent = `Goal: ${S.goalPerDay}/day`;
+  document.getElementById('interval-note').textContent = `Interval: every ${interval} min`;
+
+  // History chips
+  const chips = document.getElementById('history-chips');
+  chips.innerHTML = todayLogs.slice().reverse().map(l =>
+    `<div class="chip">${new Date(l.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`
+  ).join('');
+}
+
+function mainLog() {
+  const ts = Date.now();
+  S.activeLogs.push({ ts, date: todayKey() });
+  const interval = currentInterval();
+  S.nextAllowed = ts + interval * 60000;
+  chimeFired = false;
+  save();
+  if (navigator.vibrate) navigator.vibrate([30,20,30]);
+  scheduleNotif(S.nextAllowed);
+  tick();
+}
+
+function skipSmoke() {
+  const interval = currentInterval();
+  S.nextAllowed = Date.now() + interval * 60000;
+  chimeFired = false;
+  save();
+  scheduleNotif(S.nextAllowed);
+  tick();
+}
+
+// ─────────── GOAL SCREEN ───────────
+const stepVals = { goal: 10, weeks: 8 };
+function step(field, dir) {
+  const mins = { goal: 1, weeks: 1 };
+  const maxs = { goal: 60, weeks: 26 };
+  const el = document.getElementById(field+'-val');
+  let v = parseInt(el.textContent) + dir;
+  v = Math.max(mins[field], Math.min(maxs[field], v));
+  el.textContent = v;
+}
+function saveGoal() {
+  S.goalPerDay = parseInt(document.getElementById('goal-val').textContent);
+  S.weeksToGoal = parseInt(document.getElementById('weeks-val').textContent);
+  save();
+  showScreen('main');
+}
+
+// ─────────── NOTIFICATIONS ───────────
+let scheduledNotifTimeout = null;
+async function requestNotif() {
+  if (!('Notification' in window)) { alert('Notifications not supported in this browser.'); return; }
+  const result = await Notification.requestPermission();
+  S.notifGranted = result === 'granted';
+  save();
+  updateNotifBtn();
+  if (S.notifGranted && S.nextAllowed) scheduleNotif(S.nextAllowed);
+}
+function updateNotifBtn() {
+  const btn = document.getElementById('notif-btn');
+  if (S.notifGranted) { btn.textContent = '🔔 Notifications ON'; btn.classList.add('on'); }
+  else { btn.textContent = '🔔 Enable notifications'; btn.classList.remove('on'); }
+}
+function scheduleNotif(ts) {
+  clearTimeout(scheduledNotifTimeout);
+  if (!S.notifGranted) return;
+  const delay = ts - Date.now();
+  if (delay < 0) return;
+  scheduledNotifTimeout = setTimeout(() => {
+    new Notification('🍃 Slow Burn', { body: 'You may have a cigarette now.', icon: 'icon.png', badge: 'icon.png' });
+  }, delay);
+}
+
+// ─────────── CHIME ───────────
+function fireChime() {
+  showChimeBanner();
+  playChime(false);
+}
+function showChimeBanner() {
+  const b = document.getElementById('chime-banner');
+  b.style.display = 'block';
+  setTimeout(() => { b.style.display = 'none'; }, 4000);
+}
+function playChime(quick) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const freqs = quick ? [659] : [523, 659, 784, 1047];
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq; osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.18;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.25, t + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+      osc.start(t); osc.stop(t + 0.7);
+    });
+  } catch(e) {}
+}
+
+// ─────────── HELPERS ───────────
+function fmtMs(ms) {
+  if (ms <= 0) return 'NOW';
+  const s = Math.ceil(ms / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${sec}s`;
+  return `${sec}s`;
+}
+function formatDayLabel(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[d.getDay()]} ${months[d.getMonth()]} ${d.getDate()}`;
+}
+</script>
+</body>
+</html>

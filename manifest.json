@@ -2,21 +2,16 @@
   "name": "Slow Burn",
   "short_name": "Slow Burn",
   "description": "Gentle cigarette reduction pacer",
-  "start_url": "./index.html",
+  "start_url": "/slowburn/index.html",
+  "scope": "/slowburn/",
   "display": "standalone",
   "background_color": "#0d1f14",
   "theme_color": "#0d1f14",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "https://packemup83.github.io/slowburn/icon.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon.png",
-      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }

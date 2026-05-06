@@ -5,8 +5,8 @@
   "start_url": "/slowburn/index.html",
   "scope": "/slowburn/",
   "display": "standalone",
-  "background_color": "#0d1f14",
-  "theme_color": "#0d1f14",
+  "background_color": "#0a1a0f",
+  "theme_color": "#0a1a0f",
   "orientation": "portrait",
   "icons": [
     {

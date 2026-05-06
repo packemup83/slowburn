@@ -635,6 +635,13 @@ function scheduleNotif(ts) {
   },delay);
 }
 
+// ── SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/slowburn/sw.js').catch(e => console.log('SW error:', e));
+  });
+}
+
 // ── CHIME ──
 function fireChime() {
   const b=document.getElementById('chime-banner');

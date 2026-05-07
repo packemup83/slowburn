@@ -637,8 +637,10 @@ function scheduleNotif(ts) {
 
 // ── SERVICE WORKER ──
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(e => console.log('SW error:', e));
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    return navigator.serviceWorker.ready;
+  }).then(() => {
+    console.log('SW controlling page');
   });
 }
 

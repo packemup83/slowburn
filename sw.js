@@ -1,8 +1,8 @@
 const CACHE = 'slowburn-v1';
 const ASSETS = [
-  '/slowburn/',
-  '/slowburn/index.html',
-  '/slowburn/manifest.json'
+  './',
+  './index.html',
+  './manifest.json'
 ];
 
 self.addEventListener('install', e => {
